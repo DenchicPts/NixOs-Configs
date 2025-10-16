@@ -15,6 +15,7 @@
 	vkd3d
   	dxvk
   	mokutil
+  	r2modman
   ];
 
 

@@ -38,9 +38,10 @@ in
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  #boot.kernelPackages = pkgs.linuxPackages_6_12;
-  services.flatpak.enable = true;
   
+  # это для виртуалбокса, он тут не успевает обновляться для линукса. Поэтому пускай лучше сидит на своём старом ядре
+  #boot.kernelPackages = pkgs.linuxPackages_6_16; 
+  services.flatpak.enable = true;
   
   networking.hostName = "DenchicPts-laptop"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -125,6 +126,10 @@ in
   nixpkgs.config.allowUnfree = true;
 
 
+## Netbird VPN
+services.netbird = {
+  enable = true;
+};
 
   # Включаем поддержку OpenGL
 hardware.graphics = {
@@ -166,7 +171,6 @@ environment.systemPackages = with pkgs; [
 	vulkan-loader
 	vulkan-validation-layers
 	libdrm
-
 	## UNSTABLE PACKAGE
 
 	unstable.fastfetch  	
