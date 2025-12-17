@@ -108,7 +108,7 @@ in
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
+  services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.denchicpts = {
@@ -171,6 +171,14 @@ environment.systemPackages = with pkgs; [
 	vulkan-loader
 	vulkan-validation-layers
 	libdrm
+	steam-run
+	duf
+	protontricks
+	winetricks
+	jq
+	fd
+	wireshark
+	temurin-jre-bin-17
 	## UNSTABLE PACKAGE
 
 	unstable.fastfetch  	
@@ -178,6 +186,128 @@ environment.systemPackages = with pkgs; [
   nix.extraOptions = ''
     experimental-features = nix-command flakes
   '';
+
+
+# Возможное решение для того чтобы можно было запускать стандартные линуксовые бинарники
+programs.nix-ld = {
+  enable = true;
+  libraries = with pkgs; [
+    # Стандартные библиотеки
+    stdenv.cc.cc.lib
+    zlib
+    zstd
+    fuse3
+    icu
+    nss
+    openssl
+    curl
+    expat
+    
+    # Графика
+    libGL
+    libva
+    libdrm
+    mesa
+    vulkan-loader
+    libgbm
+    
+    # Xorg
+    xorg.libX11
+    xorg.libXcursor
+    xorg.libXrandr
+    xorg.libXrender
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXi
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libxcb
+    xorg.libXScrnSaver
+    xorg.libXxf86vm
+    xorg.libXinerama
+    xorg.libXtst
+    xorg.libxshmfence
+    xorg.libXmu
+    xorg.libXt
+    xorg.libSM
+    xorg.libICE
+    
+    # Аудио
+    alsa-lib
+    pulseaudio
+    libpulseaudio
+    
+    # GTK/Системное
+    glib
+    gtk3
+    gtk2
+    cairo
+    pango
+    fontconfig
+    freetype
+    dbus
+    at-spi2-atk
+    at-spi2-core
+    atk
+    
+    # Дополнительные часто используемые
+    libpng
+    libjpeg
+    libtiff
+    libwebp
+    pixman
+    gdk-pixbuf
+    
+    # Системные
+    systemd
+    libnotify
+    libsecret
+    util-linux
+    e2fsprogs
+    
+    # Для игр
+    SDL2
+    openal
+    
+    # Дополнительные системные библиотеки
+    attr
+    libssh
+    bzip2
+    libxml2
+    acl
+    libsodium
+    xz
+    libelf
+    
+    # Сетевые
+    krb5
+    keyutils
+    
+    # Прочие полезные
+    cups
+    nspr
+    libcap
+    libappindicator-gtk3
+    libdbusmenu
+  ];
+};
+
+
+# Для AppImage файлов
+programs.appimage = {
+  enable = true;
+  binfmt = true;
+};
+
+
+
+# For fingerprint use
+services.fprintd.enable = true;
+security.pam.services.gdm-fingerprint.enable = true;
+security.pam.services.sudo.fprintAuth = true;
+
+
+
 
 #services.udev.packages = [ pkgs.virtualbox ];
   # Some programs need SUID wrappers, can be configured further or are

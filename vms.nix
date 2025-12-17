@@ -27,6 +27,14 @@
 	
   ];
   
+  users.users.test1 = {
+  isNormalUser = true;
+  description = "Samba test user";
+  home = "/home/test1";
+  extraGroups = [ "users" "vboxusers" ];
+  initialHashedPassword = "";
+};
+  
   
   ## SAMBA
 services.samba = {
@@ -40,9 +48,11 @@ services.samba = {
     };
     Shared = {
       path = "/home/Shared";
+      "guest ok" = "no";
       "browseable" = "yes";
-      "read only" = "yes";
-      "guest ok" = "yes";
+      "create mask" = "0755";
+      "directory mask" = "0750";
+      "writeable" = "yes";
     };
     
     
@@ -53,6 +63,8 @@ services.samba = {
       "guest ok" = "no";
       "valid users" = "denchicpts";
     };
+
+    	
   };
 };
 
