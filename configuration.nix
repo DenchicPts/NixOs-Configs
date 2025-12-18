@@ -39,6 +39,16 @@ in
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
   
+  # Я попробовал обновиться 18.12.2025
+  # Столкнулся с проблемой что x11 как то работает не очень на 6.18, 6.17.8, потом откатился
+  # Откатился до своего коммита 20c4598c84a6. Буду переодически проверять как там система
+  # работает на новом ядре. 
+  
+  # !!! С Wayland никаких проблем, но hotkey дискорда для mute/unmute не работает вообще никак!
+  # Вроде сделал тоннель но всё равно он отказался работать.
+
+
+
   # это для виртуалбокса, он тут не успевает обновляться для линукса. Поэтому пускай лучше сидит на своём старом ядре
   #boot.kernelPackages = pkgs.linuxPackages_6_16; 
   services.flatpak.enable = true;
@@ -79,7 +89,7 @@ in
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
+  ############services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
@@ -136,6 +146,15 @@ hardware.graphics = {
   enable = true;
   enable32Bit = true; # для игр/Proton
 };
+
+
+	# Wayland
+services.xserver.displayManager.gdm = {
+  enable = true;
+  wayland = true;
+};
+
+
 
 services.udisks2.enable = true;
 services.gvfs.enable = true;
