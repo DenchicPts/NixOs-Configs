@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 
 let
@@ -21,24 +21,9 @@ in
     ];
 
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = false;
-  boot.loader.efi.canTouchEfiVariables = true;
-  
-  ## NEW GRUBBBSS MY SHEILA
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  boot.loader.grub.efiSupport = true;
-  boot.loader.grub.efiInstallAsRemovable = false;  # полезно для некоторых EFI
-  boot.loader.grub.device = "nodev";               # при EFI не указываем диск напрямую
-  boot.loader.efi.efiSysMountPoint = "/boot";
-  boot.loader.grub.useOSProber = true;          # чтобы автоматически находить Ubuntu
-
-
-
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  
+  nixpkgs.config.allowUnfree = true;
   # Я попробовал обновиться 18.12.2025
   # Столкнулся с проблемой что x11 как то работает не очень на 6.18, 6.17.8, потом откатился
   # Откатился до своего коммита 20c4598c84a6. Буду переодически проверять как там система
@@ -47,14 +32,12 @@ in
   # !!! С Wayland никаких проблем, но hotkey дискорда для mute/unmute не работает вообще никак!
   # Вроде сделал тоннель но всё равно он отказался работать.
 
-
-
   # это для виртуалбокса, он тут не успевает обновляться для линукса. Поэтому пускай лучше сидит на своём старом ядре
   #boot.kernelPackages = pkgs.linuxPackages_6_16; 
-  services.flatpak.enable = true;
-  
+
+  # Enable networking
+  networking.networkmanager.enable = true;
   networking.hostName = "DenchicPts-laptop"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   nix.settings = {
     substituters = [
@@ -68,58 +51,6 @@ in
     ];
   };
 
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
-  # AMD GPU
-  services.xserver.videoDrivers = ["amdgpu"];
-
-  # Set your time zone.
-  time.timeZone = "Europe/Riga";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
-  ############services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-
-  # Enable sound with pipewire.
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.denchicpts = {
     isNormalUser = true;
@@ -130,34 +61,158 @@ in
     ];
   };
 
+  # Set your time zone.
+  time.timeZone = "Europe/Riga";
 
-  programs.firefox.enable = true;
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
 
-  nixpkgs.config.allowUnfree = true;
 
 
-## Netbird VPN
-services.netbird = {
-  enable = true;
-};
+  # =======================
+  # GRUB AND THEMES + OPTIMIZATION
+  # =======================
+  boot.loader = {
+    systemd-boot.enable = false;
+    efi = {
+      canTouchEfiVariables = true;
+      efiSysMountPoint = "/boot";
+    };
+    
+    grub = {
+      enable = true;
+      version = 2;
+      efiSupport = true;
+      efiInstallAsRemovable = false;
+      device = "nodev";
+      useOSProber = true;  # чтобы автоматически находить доп OS
+      timeout = 5; # 5 секунд как ты хотел
+    };
+  };
+
+  boot = {
+    # Современный systemd в initrd (ускоряет загрузку)
+    initrd.systemd.enable = true;
+    # В будущем надо разобраться с plymooth, иконка загрузки типо
+  };
+  
+
+
+  # Enable sound with pipewire.
+  services.pulseaudio.enable = false;
+
+# =======================
+# SERVICES
+# =======================
+  services = {
+    # X11 & GNOME
+    xserver = {
+      enable = true;
+      videoDrivers = ["amdgpu"];
+      desktopManager.gnome.enable = true;
+      xkb = {
+        layout = "us";
+        variant = "";
+      };
+      # Enable touchpad support (enabled default in most desktopManager).
+      libinput.enable = true;
+      
+      # Wayland
+      displayManager.gdm = {
+        enable = true;
+        wayland = true;
+      };
+    };
+
+    # Audio
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      # If you want to use JACK applications, uncomment this
+      #jack.enable = true;
+
+      # use the example session manager (no others are packaged yet so this is enabled by default,
+      # no need to redefine it in your config for now)
+      #media-session.enable = true;
+    };
+
+    # GNOME services
+    gnome = {
+      gnome-online-accounts.enable = true; # Google Drive и т.д.
+      evolution-data-server.enable = lib.mkForce false; # Отключаем для ускорения
+      gnome-user-share.enable = false;
+    };
+
+    # System services
+    udisks2.enable = true;
+    gvfs.enable = true;
+    flatpak.enable = true;
+    
+    # Fingerprint
+    fprintd.enable = true;
+
+    # VPN
+    netbird.enable = true;
+
+    # ОТКЛЮЧЕННЫЕ СЕРВИСЫ (для ускорения)
+    printing.enable = false;      # Принтеры
+    avahi.enable = false;          # Поиск устройств в сети
+  };
+
+# =======================
+# SYSTEMD OPTIMIZATION
+# =======================
+  systemd = {
+    # Отключаем ожидание сети (экономия ~7 секунд)
+    services.NetworkManager-wait-online.enable = false;
+    
+    # Docker socket activation (экономия ~2.7 секунды)
+    services.docker = {
+      wantedBy = lib.mkForce [];
+    };
+    sockets.docker.wantedBy = [ "sockets.target" ];
+    
+    # Ускоряем таймауты
+    extraConfig = ''
+      DefaultTimeoutStartSec=10s
+      DefaultTimeoutStopSec=5s
+    '';
+
+    services.NetworkManager.serviceConfig = {
+      TimeoutStartSec = "2s";
+    };
+  };
+
+  # =======================
+  # SECURITY & AUDIO
+  # =======================
+  security = {
+    rtkit.enable = true;
+    # For fingerprint use
+    pam.services = {
+      gdm-fingerprint.enable = true;
+      sudo.fprintAuth = true;
+    };
+  };
+
+  programs = {
+    firefox.enable = true;
+    
+    # Для AppImage файлов
+    appimage = {
+      enable = true;
+      binfmt = true;
+    };
+  };
+
 
   # Включаем поддержку OpenGL
-hardware.graphics = {
-  enable = true;
-  enable32Bit = true; # для игр/Proton
-};
-
-
-	# Wayland
-services.xserver.displayManager.gdm = {
-  enable = true;
-  wayland = true;
-};
-
-
-
-services.udisks2.enable = true;
-services.gvfs.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true; # для игр/Proton
+  };
 
 
   # $ nix search wget
@@ -196,7 +251,6 @@ environment.systemPackages = with pkgs; [
 	winetricks
 	jq
 	fd
-	wireshark
 	temurin-jre-bin-17
 	## UNSTABLE PACKAGE
 
@@ -310,22 +364,6 @@ programs.nix-ld = {
     libdbusmenu
   ];
 };
-
-
-# Для AppImage файлов
-programs.appimage = {
-  enable = true;
-  binfmt = true;
-};
-
-
-
-# For fingerprint use
-services.fprintd.enable = true;
-security.pam.services.gdm-fingerprint.enable = true;
-security.pam.services.sudo.fprintAuth = true;
-
-
 
 
 #services.udev.packages = [ pkgs.virtualbox ];
