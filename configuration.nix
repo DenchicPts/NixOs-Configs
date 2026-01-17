@@ -12,12 +12,12 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./profiles/gnome.nix
       ./firewall.nix
       ./docker.nix
       #./vms.nix
       ./standart.nix
-      
+      ./profiles/kde.nix
+      #./profiles/gnome.nix
     ];
 
 
@@ -109,7 +109,7 @@ in
     xserver = {
       enable = true;
       videoDrivers = ["amdgpu"];
-      desktopManager.gnome.enable = true;
+
       xkb = {
         layout = "us";
         variant = "";
@@ -118,10 +118,6 @@ in
       libinput.enable = true;
       
       # Wayland
-      displayManager.gdm = {
-        enable = true;
-        wayland = true;
-      };
     };
 
     # Audio
@@ -139,11 +135,6 @@ in
     };
 
     # GNOME services
-    gnome = {
-      gnome-online-accounts.enable = true; # Google Drive и т.д.
-      evolution-data-server.enable = lib.mkForce false; # Отключаем для ускорения
-      gnome-user-share.enable = false;
-    };
 
     # System services
     udisks2.enable = true;
@@ -191,14 +182,12 @@ in
   security = {
     rtkit.enable = true;
     # For fingerprint use
-    pam.services = {
-      gdm-fingerprint.enable = true;
-      sudo.fprintAuth = true;
-    };
+    pam.services.sudo.fprintAuth = true;
   };
 
   programs = {
     firefox.enable = true;
+    gamescope.enable = true;
     
     # Для AppImage файлов
     appimage = {
@@ -252,6 +241,8 @@ environment.systemPackages = with pkgs; [
 	jq
 	fd
 	temurin-jre-bin-17
+  lutris
+  python3
 	## UNSTABLE PACKAGE
 
 	unstable.fastfetch  	
