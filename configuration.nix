@@ -2,12 +2,10 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, unstable, ... }:
 
 
-let
-  unstable = import <nixpkgs-unstable> { config = config.nixpkgs.config; };
-in
+
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -16,14 +14,21 @@ in
       ./docker.nix
       #./vms.nix
       ./standart.nix
-      ./profiles/kde.nix
-      #./profiles/gnome.nix
+      #./profiles/kde.nix
+      ./profiles/gnome.nix
+      ./spicetify.nix
     ];
 
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  nixpkgs.config.allowUnfree = true;
+
+  nixpkgs.config = {
+    allowUnfree = true;
+    permittedInsecurePackages = [
+      "electron-36.9.5"
+    ];
+  };
   # Я попробовал обновиться 18.12.2025
   # Столкнулся с проблемой что x11 как то работает не очень на 6.18, 6.17.8, потом откатился
   # Откатился до своего коммита 20c4598c84a6. Буду переодически проверять как там система
@@ -51,11 +56,15 @@ in
     ];
   };
 
+  # Define shared group for gnome & kde user 
+  users.groups.denchicpts-shared = {};
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.denchicpts = {
     isNormalUser = true;
     description = "denchicpts";
     extraGroups = [ "networkmanager" "wheel" "docker"];
+    group = "denchicpts-shared";
     packages = with pkgs; [
     #  thunderbird
     ];
@@ -81,13 +90,13 @@ in
     
     grub = {
       enable = true;
-      version = 2;
       efiSupport = true;
       efiInstallAsRemovable = false;
       device = "nodev";
       useOSProber = true;  # чтобы автоматически находить доп OS
-      timeout = 5; # 5 секунд как ты хотел
     };
+
+    timeout = 5;
   };
 
   boot = {
@@ -115,11 +124,12 @@ in
         variant = "";
       };
       # Enable touchpad support (enabled default in most desktopManager).
-      libinput.enable = true;
       
       # Wayland
     };
-
+  
+    libinput.enable = true;
+    
     # Audio
     pipewire = {
       enable = true;
@@ -203,11 +213,9 @@ in
     enable32Bit = true; # для игр/Proton
   };
 
-
   # $ nix search wget
 environment.systemPackages = with pkgs; [
 	netbird
-	spotify
 	obsidian
 	gitkraken
 	git
@@ -229,7 +237,6 @@ environment.systemPackages = with pkgs; [
 	glib
 	gtk4
  	mesa
-	mesa.drivers
 	mesa-demos
 	vulkan-loader
 	vulkan-validation-layers

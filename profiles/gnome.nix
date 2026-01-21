@@ -5,7 +5,8 @@
 
   # GNOME Desktop Environment
   services.xserver.desktopManager.gnome.enable = true;
-  
+
+  # FingerPrint  
   security.pam.services.gdm-fingerprint.enable = true;
   
   # Display Manager — GDM
@@ -25,23 +26,15 @@
   };
 
   #### GNOME tools / extensions ####
-  environment.systemPackages = with pkgs; [
-    gnome-tweaks
-    gnome-extension-manager
 
-    gnomeExtensions.user-themes
-    gnomeExtensions.dash-to-dock
+  environment.systemPackages = [
+    pkgs.gnome-tweaks
+    pkgs.gnome-extension-manager
+    pkgs.gnomeExtensions.user-themes
+    pkgs.gnomeExtensions.dash-to-dock
   ];
-
-  #### (Опционально) Настройки интерфейса через dconf
-  # Если захочешь управлять GNOME декларативно
-  #
-  # services.gnome.settings = {
-  #   "org.gnome.desktop.interface" = {
-  #     gtk-theme = "Adwaita";
-  #     icon-theme = "Adwaita";
-  #     cursor-theme = "Adwaita";
-  #     font-name = "Cantarell 11";
-  #   };
-  # };
+  
+  imports = [
+    ./gnome-extensions.nix
+  ];
 }
