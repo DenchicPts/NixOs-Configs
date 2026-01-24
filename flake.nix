@@ -47,6 +47,7 @@
           inherit system;
           specialArgs = commonSpecialArgs;
           modules = baseModules ++ [
+            ./profiles/gnome.nix
             { 
               system.nixos.label = "Gnome";
             }
@@ -81,19 +82,16 @@
         # };
 
         # 🔹 ПРИМЕР: Конфигурация с KDE вместо GNOME
-        # kde = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   specialArgs = commonSpecialArgs;
-        #   modules = [
-        #     ./configuration.nix
-        #     # ./profiles/gnome.nix  # убираем GNOME
-        #     ./profiles/kde.nix       # добавляем KDE
-        #     spicetify-nix.nixosModules.spicetify
-        #     { 
-        #       system.nixos.label = "KDE";
-        #     }
-        #   ];
-        # };
+         kde = nixpkgs.lib.nixosSystem {
+           inherit system;
+           specialArgs = commonSpecialArgs;
+           modules = baseModules ++ [
+             ./profiles/kde.nix
+             { 
+               system.nixos.label = "KDE";
+             }
+           ];
+         };
       };
 
       # 🔹 Алиас для удобства (можно использовать короткое имя)

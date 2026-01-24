@@ -14,8 +14,6 @@
       ./docker.nix
       #./vms.nix
       ./standart.nix
-      #./profiles/kde.nix
-      ./profiles/gnome.nix
       ./spicetify.nix
     ];
 
@@ -64,6 +62,7 @@
     isNormalUser = true;
     description = "denchicpts";
     extraGroups = [ "networkmanager" "wheel" "docker"];
+    homeMode = "2770";
     group = "denchicpts-shared";
     packages = with pkgs; [
     #  thunderbird
@@ -203,6 +202,10 @@
     appimage = {
       enable = true;
       binfmt = true;
+    };
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
     };
   };
 
