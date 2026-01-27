@@ -33,16 +33,22 @@
     kdePackages.kate
     kdePackages.spectacle
     kdePackages.gwenview
-    kdePackages.bluedevil
     kdePackages.kdeconnect-kde
+        kdePackages.bluedevil # для блютуза
   ];
+    
+  hardware.bluetooth = {
+    enable = true; # для блютуза
+  };
+  #services.blueman.enable = true; # для блютуза не обязательно
+
 
   programs.zsh.enable = true;
 
   users.users.denchicpts-kde = {
     isNormalUser = true;
     description = "denchicpts KDE user";
-    extraGroups = [ "wheel" "networkmanager" "docker" ];
+    extraGroups = [ "wheel" "networkmanager" "docker" "bluetooth" ];
     homeMode = "2770";
     group = "denchicpts-shared";
     shell = pkgs.zsh;
