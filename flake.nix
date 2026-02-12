@@ -2,11 +2,13 @@
   description = "NixOS stable with unstable spicetify";
 
   inputs = {
-    # 🔹 Основная система — STABLE
-    nixpkgs.url = "github:NixOS/nixpkgs/20c4598c84a6";
 
-    # Самая новая версия, но на новом ядре есть микрофризы
-    #nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    # STABLE - основные пакеты
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+
+    # Пофиг буду сидеть на САМОЙ новой версии. И всё равно что она не стабильна!
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # ЗАБУДЬТЕ
     # 🔹 UNSTABLE — только для отдельных пакетов
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # 🔹 spicetify-nix (совместим с unstable)
@@ -42,6 +44,8 @@
     in {
       nixosConfigurations = {
         
+
+
         # 🔹 Стандартная конфигурация (основная)
         DenchicPts-laptop = nixpkgs.lib.nixosSystem {
           inherit system;
@@ -54,7 +58,32 @@
           ];
         };
 
-        
+
+        ## Тестовая конфигурация для тестов самого последнего ядра
+        testing-new-kernel = nixpkgs-unstable.lib.nixosSystem {
+        inherit system;
+        specialArgs = commonSpecialArgs;
+        modules = baseModules ++ [
+          ./profiles/gnome.nix
+          { 
+            system.nixos.label = "Testing-New-Kernel";
+            boot.kernelPackages = unstablePkgs.linuxPackages_latest;
+            
+            # Попробуй эти параметры
+            boot.kernelParams = [
+              "amdgpu.dc=1"
+              "amdgpu.dpm=1"
+            ];
+            
+            # Обновленные графические пакеты
+            environment.systemPackages = with unstablePkgs; [
+              mesa
+              vulkan-loader
+              vulkan-validation-layers
+            ];
+          }
+        ];
+      };
 
         # 🔹 ПРИМЕР: Конфигурация с VirtualBox (закомментирована)
         # Раскомментируй когда понадобится

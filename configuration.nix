@@ -19,7 +19,9 @@
 
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  #boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+
 
   nixpkgs.config = {
     allowUnfree = true;
@@ -27,13 +29,17 @@
       "electron-36.9.5"
     ];
   };
-  # Я попробовал обновиться 18.12.2025
+  # ---Я попробовал обновиться 18.12.2025---  
   # Столкнулся с проблемой что x11 как то работает не очень на 6.18, 6.17.8, потом откатился
-  # Откатился до своего коммита 20c4598c84a6. Буду переодически проверять как там система
-  # работает на новом ядре. 
+  # Откатился до своего коммита 20c4598c84a6.
+  # 
   
-  # !!! С Wayland никаких проблем, но hotkey дискорда для mute/unmute не работает вообще никак!
-  # Вроде сделал тоннель но всё равно он отказался работать.
+
+  #-----
+  # 09.02.2026 Перехожу на стабильную ветку и самую новую версию. В GNOME закрепили оффициально Wayland как основа
+  #-----
+
+
 
   # это для виртуалбокса, он тут не успевает обновляться для линукса. Поэтому пускай лучше сидит на своём старом ядре
   #boot.kernelPackages = pkgs.linuxPackages_6_16; 
@@ -153,9 +159,10 @@
     # Fingerprint
     fprintd.enable = true;
 
-    # VPN
-    netbird.enable = true;
-
+    netbird = {
+      enable = true;
+      package = unstable.netbird;  
+    };
     # ОТКЛЮЧЕННЫЕ СЕРВИСЫ (для ускорения)
     printing.enable = false;      # Принтеры
     avahi.enable = false;          # Поиск устройств в сети
@@ -175,10 +182,10 @@
     sockets.docker.wantedBy = [ "sockets.target" ];
     
     # Ускоряем таймауты
-    extraConfig = ''
-      DefaultTimeoutStartSec=10s
-      DefaultTimeoutStopSec=5s
-    '';
+    settings.Manager = {
+      DefaultTimeoutStartSec = "10s";
+      DefaultTimeoutStopSec = "5s";
+    };
 
     services.NetworkManager.serviceConfig = {
       TimeoutStartSec = "2s";
@@ -218,11 +225,11 @@
 
   # $ nix search wget
 environment.systemPackages = with pkgs; [
-	netbird
+	
 	obsidian
 	gitkraken
 	git
-	tdesktop
+	telegram-desktop
 	corectrl
 	vscode
 	vulkan-tools

@@ -14,6 +14,7 @@
     enable = true;
     wayland = true;
   };
+  
 
   #### GNOME services ####
   services.gnome = {
