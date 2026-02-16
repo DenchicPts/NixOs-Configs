@@ -44,8 +44,14 @@
   # это для виртуалбокса, он тут не успевает обновляться для линукса. Поэтому пускай лучше сидит на своём старом ядре
   #boot.kernelPackages = pkgs.linuxPackages_6_16; 
 
-  # Enable networking
-  networking.networkmanager.enable = true;
+  # Enable networking + Added VPN SSTP 
+  networking.networkmanager = {
+    enable = true;
+    plugins = with pkgs; [
+      networkmanager-sstp
+    ];
+  };
+
   networking.hostName = "DenchicPts-laptop"; # Define your hostname.
 
   nix.settings = {
@@ -261,6 +267,10 @@ environment.systemPackages = with pkgs; [
   lutris
   python3
 	## UNSTABLE PACKAGE
+
+  ## MICROSOFT VPN SSTP 
+  networkmanager
+  networkmanager-sstp
 
 	unstable.fastfetch  	
   ];
