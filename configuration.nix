@@ -12,9 +12,9 @@
       ./hardware-configuration.nix
       ./firewall.nix
       ./docker.nix
-      #./vms.nix
       ./standart.nix
       ./spicetify.nix
+      ./syncthing.nix
     ];
 
 

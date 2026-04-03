@@ -4,7 +4,7 @@
   inputs = {
 
     # STABLE - основные пакеты
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # Пофиг буду сидеть на САМОЙ новой версии. И всё равно что она не стабильна!
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,11 +15,16 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, spicetify-nix, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable,  nixpkgs-stable ,spicetify-nix, ... }:
     let
       system = "x86_64-linux";
 
       pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
+      stablePkgs = import nixpkgs-stable{
         inherit system;
         config.allowUnfree = true;
       };
@@ -87,28 +92,20 @@
 
         # 🔹 ПРИМЕР: Конфигурация с VirtualBox (закомментирована)
         # Раскомментируй когда понадобится
-        # vbox = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   specialArgs = commonSpecialArgs;
-        #   modules = baseModules ++ [
-        #     ./vms.nix  # раскомментируй эту строку в configuration.nix
-        #     { 
-        #       system.nixos.label = "VirtualBox";
-        #     }
-        #   ];
-        # };
+         vbox = nixpkgs.lib.nixosSystem {
+           inherit system;
+           specialArgs = commonSpecialArgs;
+           modules = baseModules ++ [
+             ./profiles/gnome.nix
+             ./vms.nix  # раскомментируй эту строку в configuration.nix
+             { 
+               boot.kernelPackages = stablePkgs.linuxPackages_6_18;
+               system.nixos.label = "VirtualBox";
+             }
+           ];
+         };
 
-        # 🔹 ПРИМЕР: Экспериментальная конфигурация с новым ядром
-        # testing = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   specialArgs = commonSpecialArgs;
-        #   modules = baseModules ++ [
-        #     { 
-        #       system.nixos.label = "Testing-Kernel";
-        #       boot.kernelPackages = pkgs.linuxPackages_testing;
-        #     }
-        #   ];
-        # };
+
 
         # 🔹 ПРИМЕР: Конфигурация с KDE вместо GNOME
          kde = nixpkgs.lib.nixosSystem {

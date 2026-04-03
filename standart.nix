@@ -16,6 +16,7 @@
   	dxvk
   	mokutil
   	r2modman
+	jetbrains.pycharm
   ];
 
 
